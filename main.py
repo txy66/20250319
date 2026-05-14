@@ -1,7 +1,9 @@
 """
 FinanceApp - 个人财务可视化桌面应用
 
-程序入口。支持 --init-db 参数触发数据库初始化。
+程序入口。支持以下模式：
+- 默认 / --gui：启动 PyQt6 图形界面
+- --init-db：仅初始化数据库（建表 + 预置分类）
 """
 
 import argparse
@@ -11,6 +13,7 @@ import io
 # 修复 Windows 终端 UTF-8 输出
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
 from core.database import init_db, close_connection, get_connection
 
 
@@ -37,7 +40,28 @@ def print_summary() -> None:
     # 记录统计
     tx_count = conn.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
     print(f"\n📝 交易记录: {tx_count} 条")
-    print("\n✅ Phase 0 初始化完成，项目骨架就绪！\n")
+    print("\n✅ 初始化完成，项目就绪！\n")
+
+
+def run_gui() -> None:
+    """启动 PyQt6 图形界面。"""
+    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtCore import Qt
+    from ui.main_window import MainWindow
+
+    # 高 DPI 适配
+    QApplication.setHighDpiScaleFactorRoundingPolicy(
+        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+    )
+
+    app = QApplication(sys.argv)
+    app.setApplicationName("FinanceApp")
+    app.setApplicationDisplayName("个人财务管理")
+
+    window = MainWindow()
+    window.show()
+
+    sys.exit(app.exec())
 
 
 def main() -> None:
@@ -45,20 +69,22 @@ def main() -> None:
     parser.add_argument(
         "--init-db",
         action="store_true",
-        help="初始化数据库（建表 + 预置分类）",
+        help="仅初始化数据库（建表 + 预置分类）",
+    )
+    parser.add_argument(
+        "--gui",
+        action="store_true",
+        default=True,
+        help="启动图形界面（默认行为）",
     )
     args = parser.parse_args()
 
     if args.init_db:
         init_db()
         print_summary()
+        close_connection()
     else:
-        print("FinanceApp v0.1.0")
-        print("使用 --init-db 初始化数据库")
-        print("使用 --help 查看帮助")
-        init_db()
-
-    close_connection()
+        run_gui()
 
 
 if __name__ == "__main__":
