@@ -17,6 +17,7 @@ from PyQt6.QtGui import QAction
 
 from core.database import init_db, close_connection
 from ui.records import RecordsPage
+from ui.dashboard import DashboardPage
 
 
 class MainWindow(QMainWindow):
@@ -101,6 +102,11 @@ class MainWindow(QMainWindow):
         # 各页面
         self._pages: dict[str, QWidget] = {}
 
+        # 仪表盘页（Phase 2）
+        dashboard_page = DashboardPage()
+        self._pages["dashboard"] = dashboard_page
+        self._stack.addWidget(dashboard_page)
+
         # 收支记录页（Phase 1 实现）
         records_page = RecordsPage()
         self._pages["records"] = records_page
@@ -108,7 +114,6 @@ class MainWindow(QMainWindow):
 
         # 其他页面占位
         for page_id, page_name in [
-            ("dashboard", "仪表盘"),
             ("add_record", "新增记录"),
             ("import", "导入账单"),
             ("categories", "分类管理"),
@@ -120,8 +125,8 @@ class MainWindow(QMainWindow):
 
         main_layout.addWidget(self._stack, 1)
 
-        # 默认显示记录页
-        self._switch_page("records")
+        # 默认显示仪表盘
+        self._switch_page("dashboard")
 
     def _create_placeholder_page(self, name: str, page_id: str) -> QWidget:
         """创建占位页面。"""
@@ -162,6 +167,10 @@ class MainWindow(QMainWindow):
 
             # 切换到记录页时刷新
             if page_id == "records":
+                page.refresh()
+
+            # 切换到仪表盘时刷新
+            if page_id == "dashboard":
                 page.refresh()
 
     def _open_add_record_dialog(self) -> None:

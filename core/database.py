@@ -29,13 +29,13 @@ def get_connection() -> sqlite3.Connection:
 def close_connection() -> None:
     """关闭数据库连接。"""
     global _connection
-    try:
-        if _connection is not None:
+    if _connection is not None:
+        try:
             _connection.close()
-    except Exception:
-        pass
-        _connection.close()
-        _connection = None
+        except Exception:
+            pass
+        finally:
+            _connection = None
 
 
 def _create_tables(conn: sqlite3.Connection) -> None:
