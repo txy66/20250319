@@ -159,6 +159,9 @@ class DashboardPage(QWidget):
         chart_title.setStyleSheet("font-size: 14px; font-weight: bold; color: #334155; padding: 0 4px;")
         card_layout.addWidget(chart_title)
 
+        # 保存引用以便动态更新标题
+        card._title_label = chart_title
+
         card_layout.addWidget(chart_view)
         return card
 
@@ -178,6 +181,12 @@ class DashboardPage(QWidget):
             else:
                 btn.setObjectName("secondaryBtn")
                 btn.setStyleSheet("")
+
+        # 更新外层卡片标题
+        period_label = {"week": "本周", "month": "本月", "year": "本年"}[period]
+        self._line_card._title_label.setText(f"{period_label}收支趋势")
+        self._pie_card._title_label.setText(f"{period_label}支出分类占比")
+        self._bar_card._title_label.setText(f"{period_label}收支对比")
 
         # 重新加载数据
         self._load_data()
