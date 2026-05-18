@@ -1,30 +1,37 @@
 """
-charts/bar_chart.py - 月度收入 vs 支出对比柱状图
+charts/bar_chart.py - 收支对比柱状图
 
-使用 pyecharts 生成近 6 个月的收入/支出对比柱状图。
+根据时段粒度（本周/本月/本年）生成对应的收入/支出对比柱状图。
 """
 
 from pyecharts.charts import Bar
 from pyecharts import options as opts
-from pyecharts.commons.utils import JsCode
 
 
-def generate_monthly_bar_chart(data: list[dict]) -> str:
+def generate_bar_chart(
+    data: list[dict],
+    title: str = "收支对比",
+    subtitle: str = "",
+    x_label_key: str = "month",
+) -> str:
     """
-    生成月度收入 vs 支出对比柱状图（近6个月）。
+    生成收支对比柱状图。
 
     Args:
-        data: get_monthly_stats() 返回的列表（取最近6条）
+        data: 统计数据列表，每项需含 income/expense 和 x_label_key 字段
+        title: 图表标题
+        subtitle: 副标题
+        x_label_key: x轴标签的 key（"month" / "label" / "week"）
 
     Returns:
         HTML 字符串
     """
-    # 只取最近 6 个月
-    recent = data[-6:] if len(data) >= 6 else data
-    months = [item["month"] for item in recent]
-    incomes = [item["income"] for item in recent]
-    expenses = [item["expense"] for item in recent]
-    balances = [item["balance"] for item in recent]
+    labels = [item[x_label_key] for item in data]
+    incomes = [item["income"] for item in data]
+    expenses = [item["expense"] for item in data]
+
+    # x轴标签旋转角度
+    rotate = 30 if len(labels) > 10 else 0
 
     bar = (
         Bar(init_opts=opts.InitOpts(
@@ -32,7 +39,7 @@ def generate_monthly_bar_chart(data: list[dict]) -> str:
             height="350px",
             theme="light",
         ))
-        .add_xaxis(months)
+        .add_xaxis(labels)
         .add_yaxis(
             "收入",
             incomes,
@@ -47,8 +54,8 @@ def generate_monthly_bar_chart(data: list[dict]) -> str:
         )
         .set_global_opts(
             title_opts=opts.TitleOpts(
-                title="月度收支对比",
-                subtitle="近6个月",
+                title=title,
+                subtitle=subtitle,
                 title_textstyle_opts=opts.TextStyleOpts(font_size=15),
                 subtitle_textstyle_opts=opts.TextStyleOpts(font_size=11, color="#94a3b8"),
                 item_gap=4,
@@ -68,7 +75,7 @@ def generate_monthly_bar_chart(data: list[dict]) -> str:
                 textstyle_opts=opts.TextStyleOpts(font_size=11),
             ),
             xaxis_opts=opts.AxisOpts(
-                axislabel_opts=opts.LabelOpts(rotate=30, font_size=10),
+                axislabel_opts=opts.LabelOpts(rotate=rotate, font_size=10),
             ),
             yaxis_opts=opts.AxisOpts(
                 axislabel_opts=opts.LabelOpts(formatter="{value} 元", font_size=10),
@@ -76,7 +83,6 @@ def generate_monthly_bar_chart(data: list[dict]) -> str:
         )
     )
 
-    # 调整绘图区域边距，避免标题/图例与图表重叠
     bar.options["grid"] = {"top": "18%", "bottom": "14%", "left": "10%", "right": "8%"}
 
     return bar.render_embed()

@@ -1,12 +1,12 @@
 """
 ui/dashboard.py - 仪表盘页面
 
-展示本月收支概览卡片 + 三张可视化图表：
-- 月度收支趋势折线图（近12个月）
-- 本月支出分类饼图
-- 月度收入 vs 支出柱状图（近6个月）
+展示收支概览卡片 + 三张可视化图表：
+- 收支趋势折线图
+- 支出分类饼图
+- 收支对比柱状图
 
-支持切换时段范围（本周/本月/本年）。
+支持切换时段范围（本周/本月/本年），图表数据跟随时段联动。
 """
 
 from __future__ import annotations
@@ -19,7 +19,9 @@ from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
 
-from core.statistics import get_summary, get_monthly_stats, get_expense_by_category
+from core.statistics import (
+    get_summary, get_monthly_stats, get_daily_stats, get_expense_by_category,
+)
 from utils.formatter import format_amount
 from utils.date_helper import current_week_range, current_month_range
 
@@ -91,17 +93,20 @@ class DashboardPage(QWidget):
         # 折线图（占满第一行）
         self._line_view = QWebEngineView()
         self._line_view.setMinimumHeight(420)
-        charts_grid.addWidget(self._create_chart_card("月度收支趋势", self._line_view), 0, 0, 1, 2)
+        self._line_card = self._create_chart_card("收支趋势", self._line_view)
+        charts_grid.addWidget(self._line_card, 0, 0, 1, 2)
 
         # 饼图
         self._pie_view = QWebEngineView()
         self._pie_view.setMinimumHeight(420)
-        charts_grid.addWidget(self._create_chart_card("支出分类占比", self._pie_view), 1, 0)
+        self._pie_card = self._create_chart_card("支出分类占比", self._pie_view)
+        charts_grid.addWidget(self._pie_card, 1, 0)
 
         # 柱状图
         self._bar_view = QWebEngineView()
         self._bar_view.setMinimumHeight(420)
-        charts_grid.addWidget(self._create_chart_card("月度收支对比", self._bar_view), 1, 1)
+        self._bar_card = self._create_chart_card("收支对比", self._bar_view)
+        charts_grid.addWidget(self._bar_card, 1, 1)
 
         layout.addLayout(charts_grid)
         layout.addStretch()
@@ -204,16 +209,38 @@ class DashboardPage(QWidget):
         self._load_charts(start, end)
 
     def _load_charts(self, start: str, end: str) -> None:
-        """异步加载三张图表。"""
-        from charts.line_chart import generate_monthly_trend_chart
+        """根据当前时段加载三张图表。"""
+        from charts.line_chart import generate_trend_chart
         from charts.pie_chart import generate_expense_pie_chart
-        from charts.bar_chart import generate_monthly_bar_chart
+        from charts.bar_chart import generate_bar_chart
 
-        # 月度统计数据（用于折线图和柱状图）
-        monthly = get_monthly_stats(12)
+        # ── 折线图 + 柱状图：根据时段选择数据粒度 ──
+        if self._period == "week":
+            # 本周：按天展示
+            daily = get_daily_stats(start_date=start, end_date=end)
+            trend_title = "本周收支趋势"
+            bar_title = "本周收支对比"
+            chart_data = daily
+            x_key = "label"
+        elif self._period == "month":
+            # 本月：按天展示
+            daily = get_daily_stats(start_date=start, end_date=end)
+            trend_title = "本月收支趋势"
+            bar_title = "本月收支对比"
+            chart_data = daily
+            x_key = "label"
+        else:
+            # 本年：按月展示
+            monthly = get_monthly_stats(12)
+            trend_title = "本年收支趋势"
+            bar_title = "本年收支对比"
+            chart_data = monthly
+            x_key = "month"
 
         # 折线图
-        line_html = generate_monthly_trend_chart(monthly)
+        line_html = generate_trend_chart(
+            chart_data, title=trend_title, subtitle=start + " ~ " + end, x_label_key=x_key,
+        )
         self._line_view.setHtml(self._wrap_html(line_html))
 
         # 饼图（使用当前时段）
@@ -225,7 +252,9 @@ class DashboardPage(QWidget):
         self._pie_view.setHtml(self._wrap_html(pie_html))
 
         # 柱状图
-        bar_html = generate_monthly_bar_chart(monthly)
+        bar_html = generate_bar_chart(
+            chart_data, title=bar_title, subtitle=start + " ~ " + end, x_label_key=x_key,
+        )
         self._bar_view.setHtml(self._wrap_html(bar_html))
 
     @staticmethod

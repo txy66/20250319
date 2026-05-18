@@ -148,6 +148,38 @@ def get_monthly_stats(months: int = 12) -> list[dict]:
     return results
 
 
+def get_daily_stats(*, start_date: str, end_date: str) -> list[dict]:
+    """
+    获取指定日期范围内每天的收支统计。
+
+    Args:
+        start_date: 起始日期 (YYYY-MM-DD)
+        end_date: 结束日期 (YYYY-MM-DD)
+
+    Returns:
+        [{"date": "2026-05-18", "income": float, "expense": float, "balance": float}, ...]
+    """
+    conn = get_connection()
+    results = []
+
+    start = date.fromisoformat(start_date)
+    end = date.fromisoformat(end_date)
+    current = start
+
+    while current <= end:
+        d = current.isoformat()
+        summary = get_summary(start_date=d, end_date=d)
+        # 日期标签：周用 MM/DD，月用 MM/DD，年用 YYYY-MM
+        results.append({
+            "date": d,
+            "label": f"{current.month:02d}/{current.day:02d}",
+            **summary,
+        })
+        current += timedelta(days=1)
+
+    return results
+
+
 def get_expense_by_category(
     *,
     start_date: str,

@@ -1,27 +1,38 @@
 """
-charts/line_chart.py - 月度收支趋势折线图
+charts/line_chart.py - 收支趋势折线图
 
-使用 pyecharts 生成近 12 个月的收入/支出/净利润折线图。
+根据时段粒度（本周/本月/本年）生成对应的收入/支出/净利润折线图。
 """
 
 from pyecharts.charts import Line
 from pyecharts import options as opts
 
 
-def generate_monthly_trend_chart(data: list[dict]) -> str:
+def generate_trend_chart(
+    data: list[dict],
+    title: str = "收支趋势",
+    subtitle: str = "",
+    x_label_key: str = "month",
+) -> str:
     """
-    生成月度收支趋势折线图。
+    生成收支趋势折线图。
 
     Args:
-        data: get_monthly_stats() 返回的列表
+        data: 统计数据列表，每项需含 income/expense/balance 和 x_label_key 字段
+        title: 图表标题
+        subtitle: 副标题
+        x_label_key: x轴标签的 key（"month" / "label" / "week"）
 
     Returns:
         HTML 字符串
     """
-    months = [item["month"] for item in data]
+    labels = [item[x_label_key] for item in data]
     incomes = [item["income"] for item in data]
     expenses = [item["expense"] for item in data]
     balances = [item["balance"] for item in data]
+
+    # x轴标签旋转角度，标签多时旋转
+    rotate = 30 if len(labels) > 10 else 0
 
     line = (
         Line(init_opts=opts.InitOpts(
@@ -29,7 +40,7 @@ def generate_monthly_trend_chart(data: list[dict]) -> str:
             height="350px",
             theme="light",
         ))
-        .add_xaxis(months)
+        .add_xaxis(labels)
         .add_yaxis(
             "收入",
             incomes,
@@ -59,8 +70,8 @@ def generate_monthly_trend_chart(data: list[dict]) -> str:
         )
         .set_global_opts(
             title_opts=opts.TitleOpts(
-                title="月度收支趋势",
-                subtitle="近12个月",
+                title=title,
+                subtitle=subtitle,
                 title_textstyle_opts=opts.TextStyleOpts(font_size=15),
                 subtitle_textstyle_opts=opts.TextStyleOpts(font_size=11, color="#94a3b8"),
                 item_gap=4,
@@ -81,7 +92,7 @@ def generate_monthly_trend_chart(data: list[dict]) -> str:
                 textstyle_opts=opts.TextStyleOpts(font_size=11),
             ),
             xaxis_opts=opts.AxisOpts(
-                axislabel_opts=opts.LabelOpts(rotate=30, font_size=10),
+                axislabel_opts=opts.LabelOpts(rotate=rotate, font_size=10),
             ),
             yaxis_opts=opts.AxisOpts(
                 axislabel_opts=opts.LabelOpts(formatter="{value} 元", font_size=10),
@@ -90,7 +101,6 @@ def generate_monthly_trend_chart(data: list[dict]) -> str:
         )
     )
 
-    # 调整绘图区域边距，避免标题/图例与图表重叠
     line.options["grid"] = {"top": "18%", "bottom": "14%", "left": "10%", "right": "8%"}
 
     return line.render_embed()
