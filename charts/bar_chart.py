@@ -33,6 +33,9 @@ def generate_bar_chart(
     # x轴标签旋转角度
     rotate = 30 if len(labels) > 10 else 0
 
+    # 标签少时强制显示所有标签
+    x_interval = 0 if len(labels) <= 10 else None
+
     bar = (
         Bar(init_opts=opts.InitOpts(
             width="100%",
@@ -76,6 +79,7 @@ def generate_bar_chart(
             ),
             xaxis_opts=opts.AxisOpts(
                 axislabel_opts=opts.LabelOpts(rotate=rotate, font_size=10),
+                interval=x_interval,
             ),
             yaxis_opts=opts.AxisOpts(
                 axislabel_opts=opts.LabelOpts(formatter="{value} 元", font_size=10),

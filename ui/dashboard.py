@@ -239,11 +239,14 @@ class DashboardPage(QWidget):
             chart_data = daily
             x_key = "label"
         else:
-            # 本年：按月展示
+            # 本年：按月展示（只取本年月份）
+            from datetime import date
+            current_year = str(date.today().year)
             monthly = get_monthly_stats(12)
+            yearly = [m for m in monthly if m["month"].startswith(current_year)]
             trend_title = "本年收支趋势"
             bar_title = "本年收支对比"
-            chart_data = monthly
+            chart_data = yearly
             x_key = "month"
 
         # 折线图
