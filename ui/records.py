@@ -251,8 +251,8 @@ class RecordsPage(QWidget):
             # 操作按钮
             btn_widget = QWidget()
             btn_layout = QHBoxLayout(btn_widget)
-            btn_layout.setContentsMargins(4, 0, 4, 0)
-            btn_layout.setSpacing(4)
+            btn_layout.setContentsMargins(6, 0, 6, 0)
+            btn_layout.setSpacing(8)
 
             edit_btn = QPushButton("编辑")
             edit_btn.setFixedSize(60, 28)

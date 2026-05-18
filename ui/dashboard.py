@@ -119,11 +119,11 @@ class DashboardPage(QWidget):
         """创建概览卡片。"""
         card = QFrame()
         card.setObjectName("card")
-        card.setMinimumHeight(90)
+        card.setMinimumHeight(110)
 
         card_layout = QVBoxLayout(card)
-        card_layout.setSpacing(4)
-        card_layout.setContentsMargins(16, 12, 16, 12)
+        card_layout.setSpacing(6)
+        card_layout.setContentsMargins(16, 14, 16, 14)
 
         label = QLabel(title)
         label.setStyleSheet("font-size: 13px; color: #64748b; font-weight: bold;")
@@ -134,6 +134,9 @@ class DashboardPage(QWidget):
         if value_id:
             value_label.setObjectName(value_id)
         card_layout.addWidget(value_label)
+
+        # 保存引用，避免 children() 顺序不确定
+        card._value_label = value_label
 
         card_layout.addStretch()
         return card
@@ -192,10 +195,10 @@ class DashboardPage(QWidget):
         # 更新概览卡片
         summary = get_summary(start_date=start, end_date=end)
 
-        self._card_income.children()[1].setText(format_amount(summary["income"]))
-        self._card_expense.children()[1].setText(format_amount(summary["expense"]))
-        self._card_balance.children()[1].setText(format_amount(summary["balance"]))
-        self._card_count.children()[1].setText(f"{summary['count']} 条")
+        self._card_income._value_label.setText(format_amount(summary["income"]))
+        self._card_expense._value_label.setText(format_amount(summary["expense"]))
+        self._card_balance._value_label.setText(format_amount(summary["balance"]))
+        self._card_count._value_label.setText(f"{summary['count']} 条")
 
         # 加载图表
         self._load_charts(start, end)
