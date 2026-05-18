@@ -147,6 +147,7 @@ class RecordsPage(QWidget):
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
+        self._table.setColumnWidth(6, 150)  # 操作列最小宽度
 
         layout.addWidget(self._table)
 
@@ -254,14 +255,16 @@ class RecordsPage(QWidget):
             btn_layout.setSpacing(4)
 
             edit_btn = QPushButton("编辑")
-            edit_btn.setFixedSize(50, 28)
+            edit_btn.setFixedSize(60, 28)
             edit_btn.setObjectName("secondaryBtn")
+            edit_btn.setToolTip("编辑这条记录")
             edit_btn.clicked.connect(lambda checked, r=row_idx, tx_id=tx["id"]: self._on_edit(tx_id))
             btn_layout.addWidget(edit_btn)
 
             del_btn = QPushButton("删除")
-            del_btn.setFixedSize(50, 28)
+            del_btn.setFixedSize(60, 28)
             del_btn.setObjectName("dangerBtn")
+            del_btn.setToolTip("删除这条记录")
             del_btn.clicked.connect(lambda checked, tx_id=tx["id"]: self._on_delete(tx_id))
             btn_layout.addWidget(del_btn)
 
