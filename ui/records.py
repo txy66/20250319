@@ -146,8 +146,8 @@ class RecordsPage(QWidget):
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
-        self._table.setColumnWidth(6, 150)  # 操作列最小宽度
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)
+        self._table.setColumnWidth(6, 150)  # 操作列固定宽度
 
         layout.addWidget(self._table)
 
