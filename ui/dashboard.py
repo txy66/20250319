@@ -90,18 +90,18 @@ class DashboardPage(QWidget):
 
         # 折线图（占满第一行）
         self._line_view = QWebEngineView()
-        self._line_view.setMinimumHeight(380)
+        self._line_view.setMinimumHeight(420)
         charts_grid.addWidget(self._create_chart_card("月度收支趋势", self._line_view), 0, 0, 1, 2)
 
         # 饼图
         self._pie_view = QWebEngineView()
-        self._pie_view.setMinimumHeight(380)
+        self._pie_view.setMinimumHeight(420)
         charts_grid.addWidget(self._create_chart_card("支出分类占比", self._pie_view), 1, 0)
 
         # 柱状图
         self._bar_view = QWebEngineView()
-        self._bar_view.setMinimumHeight(380)
-        charts_grid.addWidget(self._create_chart_card("月度收入 vs 支出", self._bar_view), 1, 1)
+        self._bar_view.setMinimumHeight(420)
+        charts_grid.addWidget(self._create_chart_card("月度收支对比", self._bar_view), 1, 1)
 
         layout.addLayout(charts_grid)
         layout.addStretch()

@@ -46,7 +46,13 @@ def generate_monthly_bar_chart(data: list[dict]) -> str:
             label_opts=opts.LabelOpts(is_show=False),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="月度收入 vs 支出", subtitle="近6个月"),
+            title_opts=opts.TitleOpts(
+                title="月度收支对比",
+                subtitle="近6个月",
+                title_textstyle_opts=opts.TextStyleOpts(font_size=15),
+                subtitle_textstyle_opts=opts.TextStyleOpts(font_size=11, color="#94a3b8"),
+                item_gap=4,
+            ),
             tooltip_opts=opts.TooltipOpts(
                 trigger="axis",
                 formatter=(
@@ -55,12 +61,22 @@ def generate_monthly_bar_chart(data: list[dict]) -> str:
                     "支出：{c1} 元"
                 ),
             ),
-            legend_opts=opts.LegendOpts(pos_top="5%"),
-            xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=30)),
+            legend_opts=opts.LegendOpts(
+                pos_bottom="2%",
+                item_width=18,
+                item_height=10,
+                textstyle_opts=opts.TextStyleOpts(font_size=11),
+            ),
+            xaxis_opts=opts.AxisOpts(
+                axislabel_opts=opts.LabelOpts(rotate=30, font_size=10),
+            ),
             yaxis_opts=opts.AxisOpts(
-                axislabel_opts=opts.LabelOpts(formatter="{value} 元"),
+                axislabel_opts=opts.LabelOpts(formatter="{value} 元", font_size=10),
             ),
         )
     )
+
+    # 调整绘图区域边距，避免标题/图例与图表重叠
+    bar.options["grid"] = {"top": "18%", "bottom": "14%", "left": "10%", "right": "8%"}
 
     return bar.render_embed()

@@ -31,7 +31,7 @@ def generate_expense_pie_chart(data: list[dict]) -> str:
             series_name="支出",
             data_pair=pairs,
             radius=["20%", "65%"],
-            center=["50%", "55%"],
+            center=["50%", "48%"],
             rosetype="radius",
             label_opts=opts.LabelOpts(
                 formatter="{b}: {d}%",
@@ -42,15 +42,24 @@ def generate_expense_pie_chart(data: list[dict]) -> str:
             ),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="支出分类占比"),
+            title_opts=opts.TitleOpts(
+                title="支出分类占比",
+                title_textstyle_opts=opts.TextStyleOpts(font_size=15),
+                item_gap=4,
+            ),
             legend_opts=opts.LegendOpts(
-                orient="vertical",
-                pos_left="left",
-                pos_top="15%",
+                orient="horizontal",
+                pos_bottom="2%",
+                item_width=14,
+                item_height=10,
+                textstyle_opts=opts.TextStyleOpts(font_size=10),
             ),
         )
         .set_series_opts(
-            label_opts=opts.LabelOpts(formatter="{b}: {d}%"),
+            label_opts=opts.LabelOpts(
+                formatter="{b}\n{d}%",
+                font_size=10,
+            ),
         )
     )
 

@@ -58,7 +58,13 @@ def generate_monthly_trend_chart(data: list[dict]) -> str:
             itemstyle_opts=opts.ItemStyleOpts(color="#3b82f6"),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="月度收支趋势", subtitle="近12个月"),
+            title_opts=opts.TitleOpts(
+                title="月度收支趋势",
+                subtitle="近12个月",
+                title_textstyle_opts=opts.TextStyleOpts(font_size=15),
+                subtitle_textstyle_opts=opts.TextStyleOpts(font_size=11, color="#94a3b8"),
+                item_gap=4,
+            ),
             tooltip_opts=opts.TooltipOpts(
                 trigger="axis",
                 formatter=(
@@ -68,13 +74,23 @@ def generate_monthly_trend_chart(data: list[dict]) -> str:
                     "净利润：{c2} 元"
                 ),
             ),
-            legend_opts=opts.LegendOpts(pos_top="5%"),
-            xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=30)),
+            legend_opts=opts.LegendOpts(
+                pos_bottom="2%",
+                item_width=18,
+                item_height=10,
+                textstyle_opts=opts.TextStyleOpts(font_size=11),
+            ),
+            xaxis_opts=opts.AxisOpts(
+                axislabel_opts=opts.LabelOpts(rotate=30, font_size=10),
+            ),
             yaxis_opts=opts.AxisOpts(
-                axislabel_opts=opts.LabelOpts(formatter="{value} 元"),
+                axislabel_opts=opts.LabelOpts(formatter="{value} 元", font_size=10),
             ),
             datazoom_opts=[opts.DataZoomOpts(type_="inside")],
         )
     )
+
+    # 调整绘图区域边距，避免标题/图例与图表重叠
+    line.options["grid"] = {"top": "18%", "bottom": "14%", "left": "10%", "right": "8%"}
 
     return line.render_embed()
