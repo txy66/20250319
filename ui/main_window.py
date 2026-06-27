@@ -18,6 +18,7 @@ from PyQt6.QtGui import QAction
 from core.database import init_db, close_connection
 from ui.records import RecordsPage
 from ui.dashboard import DashboardPage
+from ui.calendar_page import CalendarPage
 
 
 class MainWindow(QMainWindow):
@@ -68,6 +69,7 @@ class MainWindow(QMainWindow):
         # 导航按钮
         nav_items = [
             ("📊", "仪表盘", "dashboard"),
+            ("📅", "日历", "calendar"),
             ("📋", "收支记录", "records"),
             ("➕", "新增记录", "add_record"),
             ("📁", "导入账单", "import"),
@@ -106,6 +108,11 @@ class MainWindow(QMainWindow):
         dashboard_page = DashboardPage()
         self._pages["dashboard"] = dashboard_page
         self._stack.addWidget(dashboard_page)
+
+        # 日历页（Phase 3）
+        calendar_page = CalendarPage()
+        self._pages["calendar"] = calendar_page
+        self._stack.addWidget(calendar_page)
 
         # 收支记录页（Phase 1 实现）
         records_page = RecordsPage()
@@ -171,6 +178,10 @@ class MainWindow(QMainWindow):
 
             # 切换到仪表盘时刷新
             if page_id == "dashboard":
+                page.refresh()
+
+            # 切换到日历页时刷新
+            if page_id == "calendar":
                 page.refresh()
 
     def _open_add_record_dialog(self) -> None:

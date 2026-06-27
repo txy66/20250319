@@ -305,3 +305,160 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 QMessageBox {
     background-color: #ffffff;
 }
+
+/* ── 日历页面 ── */
+
+/* 头部 */
+#calendarHeader {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#calendarMonthLabel {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+#calendarMonthSummary {
+    font-size: 13px;
+    color: #475569;
+    padding: 2px 0;
+}
+
+#calendarNavBtn {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 20px;
+    padding: 4px;
+}
+
+#calendarNavBtn:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+/* 网格区域 */
+#calendarGridArea {
+    background-color: #ffffff;
+}
+
+#weekdayHeader {
+    font-size: 12px;
+    font-weight: bold;
+    color: #94a3b8;
+    background-color: transparent;
+}
+
+/* 日期格子 */
+#dayCell {
+    background-color: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+}
+
+#dayCell:hover {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+#dayCell[selected="true"] {
+    background-color: #dcfce7;
+    border: 2px solid #22c55e;
+}
+
+#dayNumber {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1e293b;
+    padding: 0;
+    margin: 0;
+}
+
+#dayNumberToday {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #22c55e;
+    border-radius: 10px;
+    padding: 0 4px;
+    margin: 0;
+}
+
+#dayIncome {
+    font-size: 10px;
+    color: #10b981;
+    padding: 0;
+    margin: 0;
+}
+
+#dayExpense {
+    font-size: 10px;
+    color: #ef4444;
+    padding: 0;
+    margin: 0;
+}
+
+#dayLunar {
+    font-size: 9px;
+    color: #94a3b8;
+    padding: 0;
+    margin: 0;
+}
+
+/* 分隔线 */
+#calendarSeparator {
+    background-color: #e2e8f0;
+    max-height: 1px;
+}
+
+/* 明细区域 */
+#calendarDetailArea {
+    background-color: #ffffff;
+}
+
+#calendarDaySummary {
+    font-size: 14px;
+    color: #475569;
+    padding: 4px 0;
+}
+
+#calendarDetailScroll {
+    background-color: transparent;
+    border: none;
+}
+
+#emptyDetailLabel {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+/* 账单明细行 */
+#transactionItem {
+    background-color: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    border-radius: 0;
+}
+
+#transactionItem:hover {
+    background-color: #f8fafc;
+}
+
+#txCategoryLabel {
+    font-size: 13px;
+    color: #1e293b;
+}
+
+#txNoteLabel {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+#txAmountLabel {
+    font-size: 14px;
+    font-weight: bold;
+}

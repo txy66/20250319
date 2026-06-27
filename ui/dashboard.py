@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
+import time
 
 from core.statistics import (
     get_summary, get_monthly_stats, get_daily_stats, get_expense_by_category,
@@ -253,7 +254,7 @@ class DashboardPage(QWidget):
         line_html = generate_trend_chart(
             chart_data, title=trend_title, subtitle=start + " ~ " + end, x_label_key=x_key,
         )
-        self._line_view.setHtml(self._wrap_html(line_html))
+        self._set_chart_html(self._line_view, line_html)
 
         # 饼图（使用当前时段）
         expense_by_cat = get_expense_by_category(start_date=start, end_date=end)
@@ -261,29 +262,38 @@ class DashboardPage(QWidget):
             pie_html = generate_expense_pie_chart(expense_by_cat)
         else:
             pie_html = '<div style="text-align:center;padding:80px;color:#94a3b8;font-size:16px;">暂无支出数据</div>'
-        self._pie_view.setHtml(self._wrap_html(pie_html))
+        self._set_chart_html(self._pie_view, pie_html)
 
         # 柱状图
         bar_html = generate_bar_chart(
             chart_data, title=bar_title, subtitle=start + " ~ " + end, x_label_key=x_key,
         )
-        self._bar_view.setHtml(self._wrap_html(bar_html))
+        self._set_chart_html(self._bar_view, bar_html)
 
     @staticmethod
-    def _wrap_html(body: str) -> str:
-        """包装 pyecharts HTML 片段为完整页面。"""
-        return f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        body {{ margin: 0; padding: 0; background: #ffffff; }}
-    </style>
-</head>
-<body>
-{body}
-</body>
-</html>"""
+    def _inject_style(html: str) -> str:
+        """
+        向 pyecharts 完整 HTML 中注入 body 样式。
+        render_embed() 返回完整 HTML，不能再用 _wrap_html 双重包装。
+        """
+        body_style = "body { margin: 0; padding: 0; background: #ffffff; }"
+        # 在 <head> 后面插入 <style>
+        if "<head>" in html:
+            html = html.replace("<head>", f"<head>\n    <style>{body_style}</style>", 1)
+        elif "<head " in html:
+            html = html.replace("<head ", f"<head>\n    <style>{body_style}</style><head ", 1)
+        return html
+
+    def _set_chart_html(self, view: QWebEngineView, html_body: str) -> None:
+        """设置图表 HTML 并强制刷新（避免 QWebEngineView 缓存问题）。"""
+        html = self._inject_style(html_body)
+        # 使用唯一 baseUrl 强制 QWebEngineView 重新渲染
+        unique_url = QUrl(f"dashboard://chart/{int(time.time() * 1000000)}")
+        view.page().setContent(
+            html.encode("utf-8"),
+            mimeType="text/html; charset=utf-8",
+            baseUrl=unique_url,
+        )
 
     def refresh(self) -> None:
         """刷新仪表盘数据（供外部调用）。"""
