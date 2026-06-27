@@ -19,6 +19,9 @@ from core.database import init_db, close_connection
 from ui.records import RecordsPage
 from ui.dashboard import DashboardPage
 from ui.calendar_page import CalendarPage
+from ui.categories import CategoriesPage
+from ui.import_page import ImportPage
+from ui.ai_analysis import AIAnalysisPage
 
 
 class MainWindow(QMainWindow):
@@ -119,12 +122,24 @@ class MainWindow(QMainWindow):
         self._pages["records"] = records_page
         self._stack.addWidget(records_page)
 
-        # 其他页面占位
+        # 分类管理页（Phase 5）
+        categories_page = CategoriesPage()
+        self._pages["categories"] = categories_page
+        self._stack.addWidget(categories_page)
+
+        # 导入账单页（Phase 4）
+        import_page = ImportPage()
+        self._pages["import"] = import_page
+        self._stack.addWidget(import_page)
+
+        # AI 分析页（Phase 7）
+        ai_page = AIAnalysisPage()
+        self._pages["ai_analysis"] = ai_page
+        self._stack.addWidget(ai_page)
+
+        # 占位页面
         for page_id, page_name in [
             ("add_record", "新增记录"),
-            ("import", "导入账单"),
-            ("categories", "分类管理"),
-            ("ai_analysis", "AI 分析"),
         ]:
             placeholder = self._create_placeholder_page(page_name, page_id)
             self._pages[page_id] = placeholder
@@ -182,6 +197,10 @@ class MainWindow(QMainWindow):
 
             # 切换到日历页时刷新
             if page_id == "calendar":
+                page.refresh()
+
+            # 切换到分类管理页时刷新
+            if page_id == "categories":
                 page.refresh()
 
     def _open_add_record_dialog(self) -> None:
