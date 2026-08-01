@@ -275,14 +275,10 @@ class DashboardPage(QWidget):
         """
         向 pyecharts 完整 HTML 中注入 body 样式。
         render_embed() 返回完整 HTML，不能再用 _wrap_html 双重包装。
+        同时把外部 echarts CDN 引用替换为本地 inline 脚本，避免 SSL 握手失败。
         """
-        body_style = "body { margin: 0; padding: 0; background: #ffffff; }"
-        # 在 <head> 后面插入 <style>
-        if "<head>" in html:
-            html = html.replace("<head>", f"<head>\n    <style>{body_style}</style>", 1)
-        elif "<head " in html:
-            html = html.replace("<head ", f"<head>\n    <style>{body_style}</style><head ", 1)
-        return html
+        from charts.utils import prepare_chart_html
+        return prepare_chart_html(html, bg="#ffffff")
 
     def _set_chart_html(self, view: QWebEngineView, html_body: str) -> None:
         """设置图表 HTML 并强制刷新（避免 QWebEngineView 缓存问题）。"""

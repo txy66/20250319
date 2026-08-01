@@ -1,8 +1,9 @@
 """
-ui/main_window.py - 主窗口（含侧边导航）
+ui/main_window.py — 主窗口（含侧边导航 + 动态主题 + 自定义背景）
 
-作为应用的顶层窗口，包含左侧侧边导航和右侧内容区域。
-Phase 1 阶段实现了收支记录页面的导航，其余页面为占位。
+作为应用的顶层窗口，包含左侧侧边导航、右侧内容区域，以及最底层的
+自定义背景层。主题色彩和背景配置由 utils/theme_manager 统一管理，
+启动时自动加载上次保存的设置。
 """
 
 from __future__ import annotations
@@ -10,10 +11,9 @@ from __future__ import annotations
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QStackedWidget, QFrame,
-    QSizePolicy,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPixmap
 
 from core.database import init_db, close_connection
 from ui.records import RecordsPage
@@ -22,6 +22,9 @@ from ui.calendar_page import CalendarPage
 from ui.categories import CategoriesPage
 from ui.import_page import ImportPage
 from ui.ai_analysis import AIAnalysisPage
+from ui.theme_settings_dialog import ThemeSettingsDialog
+from utils.theme_manager import get_theme_manager
+from utils.background_manager import get_background_manager
 
 
 class MainWindow(QMainWindow):
@@ -33,17 +36,24 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1000, 700)
         self.resize(1100, 750)
 
-        # 初始化数据库
         init_db()
-
-        # 构建 UI
         self._init_ui()
-        self._apply_style()
+        self._apply_theme()
+        self._refresh_background()
+
+    # ── UI 构建 ──
 
     def _init_ui(self) -> None:
-        """构建主界面。"""
         central = QWidget()
         self.setCentralWidget(central)
+
+        # ── 背景标签（最底层，不加入 layout，绝对定位）──
+        self._bg_label = QLabel(central)
+        self._bg_label.setObjectName("bgLayer")
+        self._bg_label.setScaledContents(True)
+        self._bg_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self._bg_label.setGeometry(central.rect())
+        self._bg_label.lower()
 
         main_layout = QHBoxLayout(central)
         main_layout.setSpacing(0)
@@ -57,19 +67,16 @@ class MainWindow(QMainWindow):
         sidebar_layout.setSpacing(4)
         sidebar_layout.setContentsMargins(4, 12, 4, 12)
 
-        # 应用标题
         app_label = QLabel("💰 个人财务管理")
         app_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         app_label.setStyleSheet("font-size: 16px; font-weight: bold; color: white; padding: 8px 0;")
         sidebar_layout.addWidget(app_label)
 
-        # 分隔线
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
         line.setStyleSheet("color: #334155;")
         sidebar_layout.addWidget(line)
 
-        # 导航按钮
         nav_items = [
             ("📊", "仪表盘", "dashboard"),
             ("📅", "日历", "calendar"),
@@ -92,134 +99,161 @@ class MainWindow(QMainWindow):
 
         sidebar_layout.addStretch()
 
-        # 版本号
-        version_label = QLabel("v0.2.0")
+        self._settings_btn = QPushButton("  🎨  外观设置")
+        self._settings_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._settings_btn.clicked.connect(self._open_appearance_settings)
+        sidebar_layout.addWidget(self._settings_btn)
+
+        version_label = QLabel("v0.3.0")
         version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         version_label.setStyleSheet("color: #64748b; font-size: 11px; padding: 4px 0;")
         sidebar_layout.addWidget(version_label)
 
         main_layout.addWidget(sidebar)
 
-        # ── 内容区域 ──
+        # ── 内容区 ──
         self._stack = QStackedWidget()
         self._stack.setObjectName("contentArea")
 
-        # 各页面
         self._pages: dict[str, QWidget] = {}
 
-        # 仪表盘页（Phase 2）
         dashboard_page = DashboardPage()
         self._pages["dashboard"] = dashboard_page
         self._stack.addWidget(dashboard_page)
 
-        # 日历页（Phase 3）
         calendar_page = CalendarPage()
         self._pages["calendar"] = calendar_page
         self._stack.addWidget(calendar_page)
 
-        # 收支记录页（Phase 1 实现）
         records_page = RecordsPage()
         self._pages["records"] = records_page
         self._stack.addWidget(records_page)
 
-        # 分类管理页（Phase 5）
         categories_page = CategoriesPage()
         self._pages["categories"] = categories_page
         self._stack.addWidget(categories_page)
 
-        # 导入账单页（Phase 4）
         import_page = ImportPage()
         self._pages["import"] = import_page
         self._stack.addWidget(import_page)
 
-        # AI 分析页（Phase 7）
         ai_page = AIAnalysisPage()
         self._pages["ai_analysis"] = ai_page
         self._stack.addWidget(ai_page)
 
-        # 占位页面
-        for page_id, page_name in [
-            ("add_record", "新增记录"),
-        ]:
+        for page_id, page_name in [("add_record", "新增记录")]:
             placeholder = self._create_placeholder_page(page_name, page_id)
             self._pages[page_id] = placeholder
             self._stack.addWidget(placeholder)
 
         main_layout.addWidget(self._stack, 1)
 
-        # 默认显示仪表盘
         self._switch_page("dashboard")
 
     def _create_placeholder_page(self, name: str, page_id: str) -> QWidget:
-        """创建占位页面。"""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         label = QLabel(f"{name}")
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setStyleSheet("font-size: 24px; color: #94a3b8; font-weight: bold;")
         layout.addWidget(label)
-
-        sub = QLabel("该功能将在后续阶段实现 ✨")
+        sub = QLabel("该功能将在后续版本实现 ✨")
         sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
         sub.setStyleSheet("font-size: 14px; color: #cbd5e1; margin-top: 8px;")
         layout.addWidget(sub)
-
         return page
 
     def _switch_page(self, page_id: str) -> None:
-        """切换侧边栏导航页面。"""
-        # 更新按钮选中状态
         for btn, pid in self._nav_buttons:
             btn.setChecked(pid == page_id)
 
-        # 特殊处理：新增记录按钮打开对话框而非切换页面
         if page_id == "add_record":
-            # 确保记录页保持选中
             for btn, pid in self._nav_buttons:
                 btn.setChecked(pid == "records")
             self._open_add_record_dialog()
             return
 
-        # 切换页面
         page = self._pages.get(page_id)
         if page:
             self._stack.setCurrentWidget(page)
-
-            # 切换到记录页时刷新
             if page_id == "records":
                 page.refresh()
-
-            # 切换到仪表盘时刷新
             if page_id == "dashboard":
                 page.refresh()
-
-            # 切换到日历页时刷新
             if page_id == "calendar":
                 page.refresh()
-
-            # 切换到分类管理页时刷新
             if page_id == "categories":
                 page.refresh()
 
     def _open_add_record_dialog(self) -> None:
-        """打开新增记录对话框。"""
         from ui.add_record import AddRecordDialog
         dialog = AddRecordDialog(self)
         if dialog.exec() == AddRecordDialog.DialogCode.Accepted:
-            # 切换到记录页并刷新
             self._switch_page("records")
 
-    def _apply_style(self) -> None:
-        """加载 QSS 样式表。"""
-        import os
-        style_path = os.path.join(os.path.dirname(__file__), "styles.qss")
-        if os.path.exists(style_path):
-            with open(style_path, "r", encoding="utf-8") as f:
-                self.setStyleSheet(f.read())
+    # ── 外观设置 ──
+
+    def _open_appearance_settings(self) -> None:
+        """打开主题+背景设置对话框。"""
+        for btn, _ in self._nav_buttons:
+            btn.setChecked(False)
+
+        dialog = ThemeSettingsDialog(self)
+        if dialog.exec() == ThemeSettingsDialog.DialogCode.Accepted:
+            # 用户点了应用 → 全量刷新
+            self._apply_theme()
+            self._refresh_background()
+
+        # 恢复当前页面选中态
+        current_id = None
+        idx = self._stack.currentIndex()
+        if idx >= 0:
+            current_widget = self._stack.widget(idx)
+            for pid, w in self._pages.items():
+                if w is current_widget:
+                    current_id = pid
+                    break
+        for btn, pid in self._nav_buttons:
+            btn.setChecked(pid == current_id)
+
+    def _apply_theme(self) -> None:
+        """从 theme_manager 获取动态 QSS 并应用到窗口。"""
+        qss = get_theme_manager().stylesheet()
+        self.setStyleSheet(qss)
+
+    # ── 背景 ──
+
+    def _refresh_background(self) -> None:
+        """重新生成背景 pixmap。"""
+        central = self.centralWidget()
+        size = central.size() if central else self.size()
+        if size.width() <= 0 or size.height() <= 0:
+            size = self.size()
+
+        pixmap = get_background_manager().render(QSize(size.width(), size.height()))
+        if pixmap.isNull():
+            self._bg_label.clear()
+            self._bg_label.setStyleSheet("")
+        else:
+            self._bg_label.setPixmap(pixmap)
+            self._bg_label.setStyleSheet("background: transparent;")
+
+    # ── 事件 ──
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        central = self.centralWidget()
+        if central is not None:
+            self._bg_label.setGeometry(central.rect())
+        self._refresh_background()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self._refresh_background()
+
+    # ── 清理 ──
 
     def closeEvent(self, event) -> None:
-        """窗口关闭时清理资源。"""
         close_connection()
         event.accept()

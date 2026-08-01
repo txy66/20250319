@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>个人财务可视化桌面应用</title>
+<style>
+  :root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 480px; margin: 0 auto; padding: 0; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+    padding: 48px 24px 40px;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -30px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .hero-icon { font-size: 52px; margin-bottom: 12px; position: relative; z-index: 1; }
+  .hero h1 { font-size: 24px; font-weight: 700; position: relative; z-index: 1; margin-bottom: 8px; }
+  .hero p { font-size: 14px; opacity: 0.9; position: relative; z-index: 1; }
+  .hero-badges { display: flex; justify-content: center; gap: 8px; margin-top: 16px; position: relative; z-index: 1; flex-wrap: wrap; }
+  .hero-badge {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* ── Section ── */
+  .section { padding: 28px 20px; }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px; height: 20px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  /* ── Tech Stack ── */
+  .tech-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .tech-tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: var(--shadow);
+  }
+  .tech-tag span { font-size: 16px; }
+
+  /* ── Feature Cards ── */
+  .feature-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: transform 0.2s;
+  }
+  .feature-card:active { transform: scale(0.98); }
+  .feature-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .feature-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .feature-icon.blue { background: #dbeafe; }
+  .feature-icon.green { background: #dcfce7; }
+  .feature-icon.purple { background: #ede9fe; }
+  .feature-icon.orange { background: #fef3c7; }
+  .feature-icon.red { background: #fee2e2; }
+  .feature-title { font-size: 15px; font-weight: 700; }
+  .feature-desc { font-size: 13px; color: var(--text-light); line-height: 1.7; }
+
+  /* ── Highlight ── */
+  .highlight-box {
+    background: linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%);
+    border-radius: var(--radius);
+    padding: 22px;
+    text-align: center;
+    border: 1px solid #c7d2fe;
+  }
+  .highlight-box .icon { font-size: 36px; margin-bottom: 10px; }
+  .highlight-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .highlight-box p { font-size: 13px; color: var(--text-light); line-height: 1.7; }
+
+  /* ── UI Mockup ── */
+  .mockup-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+  .mockup-card {
+    min-width: 200px;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .mockup-card .mock-title { font-size: 12px; color: var(--text-light); margin-bottom: 10px; font-weight: 600; }
+  .mockup-bar { height: 8px; border-radius: 4px; margin-bottom: 8px; }
+  .mockup-bar.b1 { background: linear-gradient(90deg, #3b82f6, #60a5fa); width: 80%; }
+  .mockup-bar.b2 { background: linear-gradient(90deg, #22c55e, #4ade80); width: 60%; }
+  .mockup-bar.b3 { background: linear-gradient(90deg, #f59e0b, #fbbf24); width: 45%; }
+  .mockup-bar.b4 { background: linear-gradient(90deg, #ef4444, #f87171); width: 30%; }
+  .mockup-label { font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; margin-bottom: 6px; }
+
+  .mockup-chart { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 8px; }
+  .mockup-bar-chart { flex: 1; border-radius: 4px 4px 0 0; }
+
+  .mockup-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 8px; }
+  .mockup-cal div { text-align: center; font-size: 10px; padding: 3px 0; border-radius: 4px; }
+  .mockup-cal .has-income { background: #dcfce7; color: #16a34a; font-weight: 600; }
+  .mockup-cal .has-expense { background: #fee2e2; color: #dc2626; font-weight: 600; }
+  .mockup-cal .today { background: #3b82f6; color: #fff; font-weight: 600; }
+
+  /* ── Stats ── */
+  .stats-row { display: flex; gap: 12px; }
+  .stat-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .stat-num { font-size: 24px; font-weight: 800; color: var(--primary); }
+  .stat-label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+  /* ── GitHub Button ── */
+  .github-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background: #1e293b;
+    color: #fff;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .github-btn:active { background: #334155; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 30px 20px 40px;
+    color: var(--text-light);
+    font-size: 12px;
+  }
+  .footer .divider { width: 40px; height: 3px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.5s ease-out both; }
+  .d1 { animation-delay: 0.1s; }
+  .d2 { animation-delay: 0.2s; }
+  .d3 { animation-delay: 0.3s; }
+  .d4 { animation-delay: 0.4s; }
+  .d5 { animation-delay: 0.5s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon animate">💰</div>
+    <h1 class="animate d1">个人财务可视化桌面应用</h1>
+    <p class="animate d2">Python + PyQt6 | 独立开发</p>
+    <div class="hero-badges animate d3">
+      <div class="hero-badge">🖥️ 桌面应用</div>
+      <div class="hero-badge">📊 数据可视化</div>
+      <div class="hero-badge">🤖 AI 分析</div>
+    </div>
+  </div>
+
+  <!-- 概览数据 -->
+  <div class="section" style="padding-top: 20px; padding-bottom: 8px;">
+    <div class="stats-row animate d1">
+      <div class="stat-card">
+        <div class="stat-num">7</div>
+        <div class="stat-label">功能模块</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">25</div>
+        <div class="stat-label">Python 文件</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">独立开发</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 技术栈 -->
+  <div class="section">
+    <div class="section-title">技术栈</div>
+    <div class="tech-grid animate d1">
+      <div class="tech-tag"><span>🐍</span> Python 3.12</div>
+      <div class="tech-tag"><span> PyQt6</span> PyQt6 6.11</div>
+      <div class="tech-tag"><span> SQLite</span> 本地数据库</div>
+      <div class="tech-tag"><span>📊</span> pyecharts</div>
+      <div class="tech-tag"><span>🐼</span> pandas</div>
+      <div class="tech-tag"><span>🤖</span> DeepSeek API</div>
+      <div class="tech-tag"><span>📅</span> zhdate 农历</div>
+      <div class="tech-tag"><span>🌐</span> httpx</div>
+    </div>
+  </div>
+
+  <!-- 核心功能 -->
+  <div class="section">
+    <div class="section-title">核心功能</div>
+
+    <div class="feature-card animate d1">
+      <div class="feature-header">
+        <div class="feature-icon blue">📋</div>
+        <div class="feature-title">收支记录管理</div>
+      </div>
+      <div class="feature-desc">
+        完整的交易记录 CRUD，支持多条件筛选与分页。分类标签体系含 13 类预置分类 + 自定义分类，默认分类保护 + 关联交易校验。
+      </div>
+    </div>
+
+    <div class="feature-card animate d2">
+      <div class="feature-header">
+        <div class="feature-icon green">📊</div>
+        <div class="feature-title">数据可视化仪表盘</div>
+      </div>
+      <div class="feature-desc">
+        基于 pyecharts + pandas，折线图看趋势、玫瑰图看占比、柱状图看对比，支持本周/本月/本年时段联动切换。
+      </div>
+    </div>
+
+    <div class="feature-card animate d3">
+      <div class="feature-header">
+        <div class="feature-icon orange">📥</div>
+        <div class="feature-title">银行账单批量导入</div>
+      </div>
+      <div class="feature-desc">
+        支持 Excel / CSV 多格式解析，智能列映射 + 预览校验 + 自动分类匹配，一键批量导入历史账单。
+      </div>
+    </div>
+
+    <div class="feature-card animate d4">
+      <div class="feature-header">
+        <div class="feature-icon purple">📅</div>
+        <div class="feature-title">日历视图查询</div>
+      </div>
+      <div class="feature-desc">
+        月历网格直观展示每日收支，集成农历转换、节假日与节气标注，点击日期即可加载当日交易明细。
+      </div>
+    </div>
+
+    <div class="feature-card animate d5">
+      <div class="feature-header">
+        <div class="feature-icon red">🏷️</div>
+        <div class="feature-title">分类管理</div>
+      </div>
+      <div class="feature-desc">
+        可视化分类管理页面，支持新增 / 编辑 / 删除操作，默认分类保护机制，关联交易校验防止误删。
+      </div>
+    </div>
+  </div>
+
+  <!-- 项目亮点 -->
+  <div class="section">
+    <div class="section-title">项目亮点</div>
+    <div class="highlight-box animate d1">
+      <div class="icon">🤖</div>
+      <h3>AI 智能省钱建议</h3>
+      <p>
+        创新性接入 DeepSeek 大模型 API，对用户支出数据进行聚合分析，生成个性化消费优化方案。<br>
+        🔒 隐私保护设计 — 仅发送统计摘要，不传输原始交易明细
+      </p>
+    </div>
+  </div>
+
+  <!-- 界面预览 -->
+  <div class="section">
+    <div class="section-title">界面预览</div>
+    <div class="mockup-row">
+
+      <div class="mockup-card">
+        <div class="mock-title">📊 仪表盘</div>
+        <div class="mockup-label"><span>总支出</span><span>¥3,280</span></div>
+        <div class="mockup-bar b1"></div>
+        <div class="mockup-label"><span>总收入</span><span>¥8,500</span></div>
+        <div class="mockup-bar b2"></div>
+        <div class="mockup-chart">
+          <div class="mockup-bar-chart" style="height: 40%; background: #3b82f6;"></div>
+          <div class="mockup-bar-chart" style="height: 70%; background: #6366f1;"></div>
+          <div class="mockup-bar-chart" style="height: 55%; background: #8b5cf6;"></div>
+          <div class="mockup-bar-chart" style="height: 90%; background: #3b82f6;"></div>
+          <div class="mockup-bar-chart" style="height: 60%; background: #6366f1;"></div>
+          <div class="mockup-bar-chart" style="height: 75%; background: #8b5cf6;"></div>
+          <div class="mockup-bar-chart" style="height: 50%; background: #3b82f6;"></div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <div class="mock-title">📅 日历视图</div>
+        <div class="mockup-cal">
+          <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+          <div></div><div></div><div></div><div>1</div><div class="has-expense">2</div><div class="has-income">3</div><div>4</div>
+          <div class="has-expense">5</div><div>6</div><div class="has-income">7</div><div class="has-expense">8</div><div>9</div><div class="has-income">10</div><div>11</div>
+          <div>12</div><div class="today">13</div><div class="has-expense">14</div><div>15</div><div class="has-income">16</div><div>17</div><div>18</div>
+          <div class="has-expense">19</div><div>20</div><div>21</div><div class="has-income">22</div><div>23</div><div class="has-expense">24</div><div>25</div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <div class="mock-title">🍔 分类占比</div>
+        <div class="mockup-label"><span>餐饮</span><span>35%</span></div>
+        <div class="mockup-bar b1"></div>
+        <div class="mockup-label"><span>交通</span><span>20%</span></div>
+        <div class="mockup-bar b3"></div>
+        <div class="mockup-label"><span>购物</span><span>25%</span></div>
+        <div class="mockup-bar b4"></div>
+        <div class="mockup-label"><span>其他</span><span>20%</span></div>
+        <div class="mockup-bar b2"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 架构特点 -->
+  <div class="section">
+    <div class="section-title">架构特点</div>
+    <div class="feature-card animate d1">
+      <div class="feature-header">
+        <div class="feature-icon blue">🏗️</div>
+        <div class="feature-title">模块化分层架构</div>
+      </div>
+      <div class="feature-desc">
+        core / ui / charts / utils 四层分离，前后端一体化开发，代码结构清晰可维护。SQLite 本地持久化，无需服务器即可运行。
+      </div>
+    </div>
+    <div class="feature-card animate d2">
+      <div class="feature-header">
+        <div class="feature-icon green">⚡</div>
+        <div class="feature-title">异步线程分析</div>
+      </div>
+      <div class="feature-desc">
+        AI 分析采用后台线程异步执行，数据聚合 + Prompt 构建 + 结果渲染全链路设计，界面不卡顿。
+      </div>
+    </div>
+  </div>
+
+  <!-- GitHub -->
+  <div class="section">
+    <a class="github-btn" href="https://github.com/txy66/20250319" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      查看源码 (GitHub)
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="divider"></div>
+    <p>个人财务可视化桌面应用 · 独立开发</p>
+    <p style="margin-top: 4px;">Python + PyQt6 + SQLite + pyecharts + DeepSeek AI</p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -145,7 +145,7 @@ class CategoriesPage(QWidget):
         self._table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
         self._table.setColumnWidth(0, 80)
         self._table.setColumnWidth(2, 100)
-        self._table.setColumnWidth(3, 200)
+        self._table.setColumnWidth(3, 170)
         self._table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self._table.setAlternatingRowColors(True)
@@ -179,15 +179,33 @@ class CategoriesPage(QWidget):
                 type_item.setForeground(Qt.GlobalColor.red)
             self._table.setItem(row, 2, type_item)
 
-            # 操作按钮
+            # 操作按钮：编辑 + 删除
             btn_widget = QWidget()
+            btn_widget.setStyleSheet("background: transparent; border: none;")
             btn_layout = QHBoxLayout(btn_widget)
             btn_layout.setContentsMargins(4, 2, 4, 2)
-            btn_layout.setSpacing(6)
+            btn_layout.setSpacing(8)
 
             edit_btn = QPushButton("编辑")
-            edit_btn.setFixedSize(60, 28)
-            edit_btn.setObjectName("secondaryBtn")
+            edit_btn.setFixedSize(64, 30)
+            edit_btn.setStyleSheet(
+                "QPushButton {"
+                "  background-color: #ffffff;"
+                "  color: #374151;"
+                "  border: 1px solid #d1d5db;"
+                "  border-radius: 6px;"
+                "  padding: 0px;"
+                "  font-size: 13px;"
+                "  font-weight: bold;"
+                "}"
+                "QPushButton:hover {"
+                "  background-color: #f9fafb;"
+                "  border-color: #9ca3af;"
+                "}"
+                "QPushButton:pressed {"
+                "  background-color: #f3f4f6;"
+                "}"
+            )
             edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             edit_btn.clicked.connect(
                 lambda checked, cid=cat["id"], cn=cat["name"],
@@ -196,15 +214,30 @@ class CategoriesPage(QWidget):
             )
             btn_layout.addWidget(edit_btn)
 
-            if not cat.get("is_default"):
-                del_btn = QPushButton("删除")
-                del_btn.setFixedSize(60, 28)
-                del_btn.setObjectName("dangerBtn")
-                del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-                del_btn.clicked.connect(
-                    lambda checked, cid=cat["id"], cn=cat["name"]: self._on_delete(cid, cn)
-                )
-                btn_layout.addWidget(del_btn)
+            del_btn = QPushButton("删除")
+            del_btn.setFixedSize(64, 30)
+            del_btn.setStyleSheet(
+                "QPushButton {"
+                "  background-color: #ef4444;"
+                "  color: #ffffff;"
+                "  border: none;"
+                "  border-radius: 6px;"
+                "  padding: 0px;"
+                "  font-size: 13px;"
+                "  font-weight: bold;"
+                "}"
+                "QPushButton:hover {"
+                "  background-color: #dc2626;"
+                "}"
+                "QPushButton:pressed {"
+                "  background-color: #b91c1c;"
+                "}"
+            )
+            del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            del_btn.clicked.connect(
+                lambda checked, cid=cat["id"], cn=cat["name"]: self._on_delete(cid, cn)
+            )
+            btn_layout.addWidget(del_btn)
 
             self._table.setCellWidget(row, 3, btn_widget)
 

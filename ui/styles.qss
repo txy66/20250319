@@ -10,12 +10,21 @@ QWidget {
 }
 
 QMainWindow {
+    /* 默认纯色背景：当用户关闭自定义背景时生效 */
     background-color: #f5f7fa;
 }
 
-/* ── 侧边栏 ── */
+/* ── 自定义背景层（位于所有内容之下） ── */
+#bgLayer {
+    background: transparent;
+    /* WA_TransparentForMouseEvents 已通过代码设置，
+       这里确保背景图不响应任何鼠标事件 */
+}
+
+/* ── 侧边栏 ──
+   使用 rgba 半透明深色：保留导航清晰度的同时让背景图片微透出来 */
 #sidebar {
-    background-color: #1e293b;
+    background-color: rgba(30, 41, 59, 230);
     border: none;
 }
 
@@ -55,9 +64,10 @@ QMainWindow {
     font-weight: bold;
 }
 
-/* ── 内容区 ── */
+/* ── 内容区 ──
+   半透明浅色：让背景图片透出来，但保持轻微的浅色滤镜保证页面分区感 */
 #contentArea {
-    background-color: #f5f7fa;
+    background-color: rgba(245, 247, 250, 110);
     border: none;
 }
 
@@ -144,6 +154,11 @@ QPushButton:pressed {
 
 QPushButton#dangerBtn {
     background-color: #ef4444;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: bold;
 }
 
 QPushButton#dangerBtn:hover {
@@ -154,6 +169,10 @@ QPushButton#secondaryBtn {
     background-color: #ffffff;
     color: #374151;
     border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: bold;
 }
 
 QPushButton#secondaryBtn:hover {
@@ -308,10 +327,11 @@ QMessageBox {
 
 /* ── 日历页面 ── */
 
-/* 头部 */
+/* 头部：保持白色实色保证文字清晰，但允许头部透明以微微透出背景 */
 #calendarHeader {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 220);
     border-bottom: 1px solid #e2e8f0;
+    border-radius: 8px;
 }
 
 #calendarMonthLabel {
@@ -344,7 +364,8 @@ QMessageBox {
 
 /* 网格区域 */
 #calendarGridArea {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 180);
+    border-radius: 8px;
 }
 
 #weekdayHeader {
@@ -418,7 +439,8 @@ QMessageBox {
 
 /* 明细区域 */
 #calendarDetailArea {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 220);
+    border-radius: 8px;
 }
 
 #calendarDaySummary {
@@ -461,4 +483,67 @@ QMessageBox {
 #txAmountLabel {
     font-size: 14px;
     font-weight: bold;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   背景设置对话框专用样式
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* 主按钮：和普通 QPushButton 风格一致，已在通用样式中定义 */
+/* 这里单独给主按钮一个明确的命名，便于对话框使用 */
+
+/* ── 缩略图卡片 ── */
+#bgThumbCard {
+    background-color: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+#bgThumbCard:hover {
+    border-color: #94a3b8;
+}
+
+#bgThumbCard[selected="true"] {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+/* 缩略图卡片内嵌的单选按钮（紧凑显示） */
+#bgThumbRadio {
+    font-size: 13px;
+    color: #1e293b;
+    spacing: 4px;
+}
+
+#bgThumbRadio::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    border: 2px solid #cbd5e1;
+    background-color: #ffffff;
+}
+
+#bgThumbRadio::indicator:hover {
+    border-color: #3b82f6;
+}
+
+#bgThumbRadio::indicator:checked {
+    border: 2px solid #3b82f6;
+    background-color: #3b82f6;
+}
+
+/* ── 透明度数值显示 ── */
+#opacityValue {
+    font-size: 13px;
+    font-weight: bold;
+    color: #1e293b;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+/* ── 实时预览区域 ── */
+#bgPreview {
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    /* 预览尺寸固定，无需缩放 */
 }
